@@ -1,0 +1,44 @@
+#!/bin/bash
+
+prd=$1
+
+prd_metadata=$( unzip -l ${prd} | grep  product.xml | tr -s " " | cut -d " " -f 5 )
+
+min_lon=$( unzip -p ${prd} ${prd_metadata} | xmllint \
+    --nowarning \
+    --xpath "(//*[local-name()='longitude'])/text()" - | jq -s min )
+
+max_lon=$( unzip -p ${prd} ${prd_metadata} | xmllint \
+    --nowarning \
+    --xpath "(//*[local-name()='longitude'])/text()" - | jq -s max )
+
+min_lat=$( unzip -p ${prd} ${prd_metadata} | xmllint \
+    --nowarning \
+    --xpath "(//*[local-name()='latitude'])/text()" - | jq -s min )
+
+max_lat=$( unzip -p ${prd} ${prd_metadata} | xmllint \
+    --nowarning \
+    --xpath "(//*[local-name()='latitude'])/text()" - | jq -s max )
+
+bbox="${min_lon},${min_lat},${max_lon},${max_lat}"
+
+datetime=$( unzip -p ${prd} ${prd_metadata} | xmllint --nowarning --xpath "(//*[local-name()='rawDataStartTime'])[1]/text()" - )
+
+gsd=1
+
+source ./functions.sh
+
+item=$( echo ${prd} | sed 's/zip/json/' )
+
+echo $item 
+
+# initialise a STAC item
+init_item ${datetime} "${bbox}" "${gsd}" > item.json
+
+cp ${prd} data.zip
+
+# add an asset
+add_asset item.json "download" "data.zip" "application/zip" "RCM acquisition" "data"
+
+
+
