@@ -26,19 +26,23 @@ datetime=$( unzip -p ${prd} ${prd_metadata} | xmllint --nowarning --xpath "(//*[
 
 gsd=1
 
-source ./functions.sh
+source ../functions.sh
 
 item=$( echo ${prd} | sed 's/zip/json/' )
 
 echo $item 
 
 # initialise a STAC item
-init_item ${datetime} "${bbox}" "${gsd}" > item.json
+init_item \
+    $( echo ${prd} | sed 's/\.zip//' ) \
+    ${datetime} \
+    "${bbox}" \
+    "${gsd}" > item.json
 
-cp ${prd} data.zip
+#cp ${prd} data.zip
 
 # add an asset
-add_asset item.json "download" "data.zip" "application/zip" "RCM acquisition" "data"
+add_asset item.json "download" ${prd} "application/zip" "RCM acquisition" "data"
 
 
 

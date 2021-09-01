@@ -79,13 +79,13 @@ export -f add_item
 
 function init_item {
 
-    datetime=$1
-    bbox=$2
-    gsd=$3
-    
+    item=$1
+    datetime=$2
+    bbox=$3
+    gsd=$4
 
     echo '{}' |
-    jq '.["id"]="item_id"' | # set the item id
+    jq --arg item_id ${item} '.["id"]=$item_id' | # set the item id
     jq '.["stac_version"]="1.0.0"' | 
     jq '.["type"]="Feature"' | # set the item type
     jq --arg c "$( echo $bbox | cut -d ',' -f 1)" '.bbox[0]=$c' | # set the bbox elements 
@@ -132,7 +132,7 @@ function add_asset {
         --arg type "${type}" \
         --arg title "${title}" \
         --arg role "${role}" \
-        '.assets += { ($asset_key) : { "role":[$role], "rel":"item", "href":$href, "type":$type, "title":$title}}' ${item} > ${item}.tmp && mv ${item}.tmp ${item}
+        '.assets += { ($asset_key) : { "roles":[$role], "href":$href, "type":$type, "title":$title}}' ${item} > ${item}.tmp && mv ${item}.tmp ${item}
 
 
 
