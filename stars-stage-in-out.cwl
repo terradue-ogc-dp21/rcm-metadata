@@ -65,7 +65,7 @@ $graph:
         - --harvest
         - -o
         - ./
-        - valueFrom: ${ return "file://" + inputs.inp1.path + "/item.json"; }
+        - valueFrom: ${ return "file://" + inputs.inp1.path + "/" + inputs.inp1.basename + ".json"; }
         baseCommand: Stars
         class: CommandLineTool
         hints:
@@ -118,7 +118,6 @@ $graph:
         - copy
         - -rel
         - -v
-        - --harvest
         - -r
         - '4'
         baseCommand: Stars

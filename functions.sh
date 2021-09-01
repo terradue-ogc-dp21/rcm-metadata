@@ -79,10 +79,10 @@ export -f add_item
 
 function init_item {
 
-    item=$1
-    datetime=$2
-    bbox=$3
-    gsd=$4
+    local item=$1
+    local datetime=$2
+    local bbox=$3
+    local gsd=$4
 
     echo '{}' |
     jq --arg item_id ${item} '.["id"]=$item_id' | # set the item id
@@ -120,12 +120,13 @@ function add_asset {
     #  asset mime-type
     #  asset title 
     #  asset role
-    item=$1
-    asset_key=$2
-    href="$3"
-    type="$4"
-    title="$5"
-    role="$6"
+    local item=$1
+    local asset_key=$2
+    local href="$3"
+    local type="$4"
+    local title="$5"
+    local role="$6"
+
     jq -e -r \
         --arg asset_key $asset_key \
         --arg href ${href} \
