@@ -24,7 +24,16 @@ bbox="${min_lon},${min_lat},${max_lon},${max_lat}"
 
 datetime=$( unzip -p ${prd} ${prd_metadata} | xmllint --nowarning --xpath "(//*[local-name()='rawDataStartTime'])[1]/text()" - )
 
-gsd=1
+mode=$( unzip -p ${prd} ${prd_metadata} | xmllint \
+    --nowarning \
+    --xpath "(//*[local-name()='beamMode'])/text()" - )
+
+case $mode in
+
+  "High Resolution 5m")
+    gsd=5
+    ;;
+esac
 
 source ../functions.sh
 
