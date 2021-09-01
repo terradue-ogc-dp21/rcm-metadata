@@ -89,8 +89,8 @@ $graph:
         rcm: rcm 
 
       out: 
-        - stac
-        - stac_item
+      - stac
+      - stac_item
       
       run: "#raw"
 
@@ -104,7 +104,6 @@ $graph:
           source: [node_raw/stac_item]
       
       out:
-
       - harvested
 
       run: "#harvest" 
@@ -120,7 +119,8 @@ $graph:
         sink_path: sink-path
         sink_region: sink-region
         harvested: 
-            source: [node_harvest/harvested]
+          source: [node_harvest/harvested]
+
       out:
       - staged
     
@@ -201,13 +201,15 @@ $graph:
     harvested:
       outputBinding:
         glob: .
-      type: Any
+      type: Directory
   
 - class: CommandLineTool
 
   doc: Stage-out harvested acquistions
     
   id: stage-out
+
+  baseCommand: Stars
 
   arguments:
   - copy
@@ -259,6 +261,6 @@ cwlVersion: v1.0
 
 $namespaces:
   s: https://schema.org/
-s:softwareVersion: 0.1.0
+s:softwareVersion: 0.1.1
 schemas:
 - http://schema.org/version/9.0/schemaorg-current-http.rdf

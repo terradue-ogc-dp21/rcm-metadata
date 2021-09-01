@@ -41,7 +41,7 @@ item=$( basename ${prd} | sed 's/\.zip/\.json/' )
 
 # initialise a STAC item
 init_item \
-    $( dirname $item ) \
+    $( echo $item | sed 's/\.json//' ) \
     ${datetime} \
     "${bbox}" \
     "${gsd}" > ${item}
