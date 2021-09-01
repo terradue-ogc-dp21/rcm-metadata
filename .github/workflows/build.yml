@@ -49,7 +49,7 @@ jobs:
       - name: build & push raw image
         run: |
           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/raw
-          docker build src --file src/raw/Dockerfile --tag raw
+          docker build src/raw --tag raw
           docker tag raw $IMAGE_ID:${{needs.version.outputs.app-version}}
           docker push $IMAGE_ID:${{needs.version.outputs.app-version}}
   
