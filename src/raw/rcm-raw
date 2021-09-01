@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 prd=$1
 
 prd_metadata=$( unzip -l ${prd} | grep  product.xml | tr -s " " | cut -d " " -f 5 )
@@ -41,8 +39,6 @@ source /functions.sh
 
 item=$( basename ${prd} | sed 's/\.zip/\.json/' )
 
-echo ${item} 
-
 # initialise a STAC item
 init_item \
     $( dirname $item ) \
@@ -50,7 +46,6 @@ init_item \
     "${bbox}" \
     "${gsd}" > ${item}
 
-echo $item
 # add an asset
 add_asset ${item} "download" $( basename ${prd}) "application/zip" "RCM acquisition" "data"
 

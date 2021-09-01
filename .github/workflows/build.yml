@@ -1,0 +1,93 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+      - main
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install cwltool
+      - run: cwltool --validate raw-harvest-stage.cwl
+
+  version:
+    needs: validate
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      app-version: ${{ steps.set-version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY} -O /usr/bin/yq 
+        env:
+          VERSION: v4.2.0
+          BINARY: yq_linux_amd64
+      - run: chmod +x /usr/bin/yq
+      - run: echo "APP_VERSION=$( yq e '."s:softwareVersion"' raw-harvest-stage.cwl | tr -d "\n" )" >> $GITHUB_ENV
+      - run: echo app version is $APP_VERSION
+      - id: set-version
+        run: echo "::set-output name=version::$APP_VERSION"
+
+  container-raw:
+   
+    needs: version
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo version ${{needs.version.outputs.app-version}}
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+      - name: build & push raw image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/raw
+          docker build src --file src/raw/Dockerfile --tag raw
+          docker tag raw $IMAGE_ID:${{needs.version.outputs.app-version}}
+          docker push $IMAGE_ID:${{needs.version.outputs.app-version}}
+  
+  publish:
+
+    needs: 
+      - container-raw
+      - version
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: yq -i eval '(.$graph[] | select (.id == "raw") ).requirements.DockerRequirement.dockerPull = "docker.pkg.github.com/terradue-ogc-dp21/rcm-metadata/raw:${{needs.version.outputs.app-version}}"' raw-harvest-stage.cwl 
+      - run: mkdir downloads
+      - run: cp raw-harvest-stage.cwl downloads/raw-harvest-stage.${{needs.version.outputs.app-version}}.cwl
+      - run: ls downloads/raw-harvest-stage.${{needs.version.outputs.app-version}}.cwl
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: application-package
+          path: downloads
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{needs.version.outputs.app-version}}
+          tag_name: ${{needs.version.outputs.app-version}}
+          #body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: downloads/raw-harvest-stage.${{needs.version.outputs.app-version}}.cwl
+          asset_name: raw-harvest-stage.${{needs.version.outputs.app-version}}.cwl
+          asset_content_type: text/yaml
