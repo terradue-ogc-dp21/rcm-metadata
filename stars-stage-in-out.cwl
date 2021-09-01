@@ -127,7 +127,7 @@ $graph:
         doc: Run Stars for staging data
         hints:
           DockerRequirement:
-            dockerPull: terradue/stars:0.9.2
+            dockerPull: terradue/stars-t2:latest
         id: stars
         inputs:
           sink_access_key_id:
