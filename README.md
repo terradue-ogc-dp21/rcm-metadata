@@ -10,7 +10,7 @@ The CWL Workflow:
 
 NRCAN provides access to ten RCM acquisitions in the context of the OGC Disasters Pilot 21 initiative.
 
-Once downloaded from the FTP site, organize the zip archives as shown in the example below:
+Once downloaded from the FTP site, put each of the RCM zip archives in a dedicated folder as shown in the example below:
 
 ```console
 $ tree RCM1_OK1721243_PK1721268_4_5M9_20200425_001248_HH_HV_GRD/
@@ -43,4 +43,4 @@ sink-path: <replace with S3 path>
 cwltool raw-harvest-stage.0.1.1.cwl params.yml
 ```
   
-
+Done!
